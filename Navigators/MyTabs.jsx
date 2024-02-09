@@ -1,20 +1,16 @@
 import { View, Text, StyleSheet } from "react-native";
 import React from "react";
-
-import { Feather } from "@expo/vector-icons";
-import Home from "../Pages/Home";
+import Home from "../Screen/Home";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
-import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
-import CurrencyStatus from "../Pages/CurrencyStatus";
-import Profile from "../Pages/Profile";
-import Color from "../Utils/Color";
+import CurrencyStatus from "../Screen/CurrencyStatus";
+import Profile from "../Screen/Profile";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import MyCards from "../Pages/MyCards";
-import { FontAwesome } from "@expo/vector-icons";
+import Activity from "../Screen/Activity";
+import { FontAwesome5 } from "@expo/vector-icons";
 const Tab = createBottomTabNavigator();
 
-export default function MyTabs() {
+export default function MyTabs({ navigation }) {
   return (
     <>
       <Tab.Navigator
@@ -28,31 +24,31 @@ export default function MyTabs() {
 
             elevation: 0, // Remove shadow on Android
             borderTopWidth: 0, // Remove border on iOS
-            marginBottom: 2,
-            marginTop: 5,
+            paddingBottom: 10,
+
             alignItems: "center",
             justifyContent: "center",
           },
         }}
       >
         <Tab.Screen
-          name="MyCards"
+          name="Home"
           component={Home}
           options={{
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="home" size={24} color={color} />
             ),
-            tabBarLabel: "",
+            tabBarLabel: "Home",
           }}
         />
         <Tab.Screen
-          name="Home"
-          component={Home}
+          name="Activity"
+          component={Activity}
           options={{
             tabBarIcon: ({ color, size }) => (
-              <FontAwesome name="credit-card-alt" size={24} color={color} />
+              <FontAwesome5 name="history" size={24} color={color} />
             ),
-            tabBarLabel: "",
+            tabBarLabel: "Activity",
           }}
         />
         <Tab.Screen
@@ -62,7 +58,7 @@ export default function MyTabs() {
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="currency-exchange" size={24} color={color} />
             ),
-            tabBarLabel: "",
+            tabBarLabel: "Currency Status",
           }}
         />
         <Tab.Screen
@@ -72,7 +68,7 @@ export default function MyTabs() {
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="people-alt" size={24} color={color} />
             ),
-            tabBarLabel: "",
+            tabBarLabel: "Profil",
           }}
         />
       </Tab.Navigator>
