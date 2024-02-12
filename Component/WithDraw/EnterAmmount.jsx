@@ -7,14 +7,15 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
-
+import { useDispatch } from "react-redux";
+import { ammount } from "../../Redux/transactionSlice";
 export default function EnterAmmount({ navigation }) {
   const [fontsLoaded] = useFonts({
     "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
     "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
   });
-
+  const dispatch = useDispatch();
   const [text, onChangeText] = useState("");
 
   const PickMoney = (value) => {
@@ -22,6 +23,7 @@ export default function EnterAmmount({ navigation }) {
   };
   console.log("ini", typeof text);
   const GoToConfirmation = () => {
+    dispatch(ammount(text));
     navigation.navigate("Confirmation");
   };
 

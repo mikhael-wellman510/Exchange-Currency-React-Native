@@ -13,6 +13,14 @@ export default function Transaction({ navigation }) {
     "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
   });
 
+  const GoToMoneyChanger = () => {
+    navigation.navigate("MoneyChanger");
+  };
+
+  const GoToTransfers = () => {
+    navigation.navigate("Transfer");
+  };
+
   const GoToTopUp = () => {
     navigation.navigate("TopUP");
   };
@@ -32,7 +40,12 @@ export default function Transaction({ navigation }) {
         <Text style={style.text}>Top Up</Text>
       </View>
       <View style={style.a}>
-        <FontAwesome6 name="money-bill-transfer" size={24} color="black" />
+        <FontAwesome6
+          onPress={GoToTransfers}
+          name="money-bill-transfer"
+          size={24}
+          color="black"
+        />
         <Text style={style.text}>Transfer</Text>
       </View>
       <View style={style.a}>
@@ -45,7 +58,12 @@ export default function Transaction({ navigation }) {
         <Text style={style.text}>With Draw</Text>
       </View>
       <View style={style.a1}>
-        <MaterialIcons name="currency-exchange" size={24} color="black" />
+        <MaterialIcons
+          onPress={GoToMoneyChanger}
+          name="currency-exchange"
+          size={24}
+          color="black"
+        />
 
         <Text style={style.text1}>Money </Text>
         <Text style={style.text1}>Changer</Text>

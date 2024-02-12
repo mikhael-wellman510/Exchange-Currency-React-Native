@@ -13,6 +13,10 @@ import MyTabs from "./MyTabs";
 import TopUP from "../Screen/TopUp/TopUP";
 import WithDraw from "../Screen/WithDraw/WithDraw";
 import Confirmation from "../Screen/WithDraw/Confirmation";
+import Transfer from "../Screen/Transfer/Transfer";
+import TransferSucces from "../Screen/Transfer/TransferSucces";
+
+import MoneyChanger from "../Screen/MoneyChanger/MoneyChanger";
 
 const Stack = createNativeStackNavigator();
 export default function Navigation() {
@@ -45,6 +49,9 @@ export default function Navigation() {
             <Stack.Screen name="TopUP" component={TopUP} />
             <Stack.Screen name="WithDraw" component={WithDraw} />
             <Stack.Screen name="Confirmation" component={Confirmation} />
+            <Stack.Screen name="Transfer" component={Transfer} />
+            <Stack.Screen name="TransferSucces" component={TransferSucces} />
+            <Stack.Screen name="MoneyChanger" component={MoneyChanger} />
           </Stack.Navigator>
         </Provider>
       )}

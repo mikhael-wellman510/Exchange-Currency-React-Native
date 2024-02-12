@@ -6,9 +6,10 @@ import {
   Modal,
   Image,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
 import acc from "../../Asset/acc.jpg";
+import { useSelector } from "react-redux";
 export default function SubmitTransaction({ navigation }) {
   const [fontsLoaded] = useFonts({
     "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
@@ -16,6 +17,13 @@ export default function SubmitTransaction({ navigation }) {
     "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
   });
   const [modalVisible, setModalVisible] = useState(false);
+  const [withdraw, setWithdraw] = useState("");
+  const trxRedux = useSelector((state) => state.transaction.value);
+
+  useEffect(() => {
+    setWithdraw(trxRedux);
+  }, [trxRedux]);
+  console.log("hasil selector : ", trxRedux);
 
   const OpenModal = () => {
     setModalVisible(true);
@@ -30,7 +38,7 @@ export default function SubmitTransaction({ navigation }) {
       <View style={style.container}>
         <View style={style.a}>
           <Text style={style.txt}>Withdraw Balance</Text>
-          <Text style={style.txt1}>IDR 100000</Text>
+          <Text style={style.txt1}>IDR {withdraw}</Text>
         </View>
         <View style={style.a}>
           <Text style={style.txt}>Fee</Text>
@@ -38,7 +46,7 @@ export default function SubmitTransaction({ navigation }) {
         </View>
         <View style={style.a1}>
           <Text style={style.txt}>Total </Text>
-          <Text style={style.txt12}>IDR 102000</Text>
+          <Text style={style.txt12}>IDR {parseInt(withdraw) + 2000}</Text>
         </View>
         <View style={style.d}>
           <TouchableOpacity onPress={OpenModal} style={style.b}>
