@@ -22,7 +22,7 @@ export default function Transaction({ navigation }) {
   };
 
   const GoToTopUp = () => {
-    navigation.navigate("TopUP");
+    navigation.navigate("AddBank");
   };
 
   const GoToWithDraw = () => {
@@ -37,7 +37,7 @@ export default function Transaction({ navigation }) {
           size={24}
           color="black"
         />
-        <Text style={style.text}>Top Up</Text>
+        <Text style={style.text}>Add Bank</Text>
       </View>
       <View style={style.a}>
         <FontAwesome6

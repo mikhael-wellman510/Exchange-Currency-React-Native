@@ -11,9 +11,19 @@ import React, { useState } from "react";
 import img from "../Asset/pay.png";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
-
+import { baseUrl } from "../Utils/BaseUrl";
+import axios from "axios";
+import Axios from "../Utils/axiosInterceptors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDispatch } from "react-redux";
+import { tokens } from "../Redux/tokenSlice";
 export default function Login({ navigation }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [token, setToken] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(true);
+  const dispatch = useDispatch();
+  const [error, setError] = useState(false);
   const [fontsLoaded] = useFonts({
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
@@ -24,6 +34,27 @@ export default function Login({ navigation }) {
   };
   const visibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
+  };
+
+  const CekLogin = async () => {
+    try {
+      const response = await axios.post(`${baseUrl}/api/auth/login`, {
+        email: email,
+        password: password,
+      });
+      console.log(response.data);
+      dispatch(tokens(response.data.data.token));
+      const storeData = async () => {
+        try {
+          await AsyncStorage.setItem("my-key", response.data.data.token);
+        } catch (e) {}
+      };
+
+      storeData();
+    } catch (error) {
+      console.log("error boss");
+      setError(true);
+    }
   };
   return (
     <View style={style.a}>
@@ -38,11 +69,21 @@ export default function Login({ navigation }) {
 
         <Text style={style.font}>Log in and enjoy our features! </Text>
       </View>
+      <View style={{ marginBottom: 10 }}>
+        {error ? (
+          <Text style={{ color: "red" }}>Your Email or Password wrong</Text>
+        ) : (
+          ""
+        )}
+      </View>
+
       <View style={style.c}>
         <TextInput
           style={style.c1}
           placeholderTextColor={"#cccccc"}
           placeholder="Email"
+          onChangeText={setEmail}
+          value={email}
         />
         <View style={style.c2}>
           <TextInput
@@ -50,6 +91,8 @@ export default function Login({ navigation }) {
             style={style.c1b}
             placeholder="Password"
             placeholderTextColor={"#cccccc"}
+            onChangeText={setPassword}
+            value={password}
           />
           <MaterialIcons
             onPress={visibility}
@@ -61,7 +104,7 @@ export default function Login({ navigation }) {
         </View>
       </View>
       <View style={style.d}>
-        <TouchableOpacity style={style.d1}>
+        <TouchableOpacity onPress={CekLogin} style={style.d1}>
           <Text style={style.d2}>Login</Text>
         </TouchableOpacity>
       </View>

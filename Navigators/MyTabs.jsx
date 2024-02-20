@@ -68,7 +68,7 @@ export default function MyTabs({ navigation }) {
             tabBarIcon: ({ color, size }) => (
               <MaterialIcons name="people-alt" size={24} color={color} />
             ),
-            tabBarLabel: "Profil",
+            tabBarLabel: "Account Info",
           }}
         />
       </Tab.Navigator>

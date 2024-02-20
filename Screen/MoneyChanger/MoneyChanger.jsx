@@ -10,7 +10,7 @@ export default function MoneyChanger({ navigation }) {
       <View style={style.a}>
         <HeadMC navigation={navigation} />
         <BodyMC />
-        <ListCountry />
+        <ListCountry navigation={navigation} />
       </View>
     </View>
   );

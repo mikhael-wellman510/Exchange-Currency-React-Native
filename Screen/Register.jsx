@@ -5,13 +5,27 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  ScrollView,
 } from "react-native";
 import React, { useState } from "react";
 import img2 from "../Asset/pay2.jpg";
 import { NavigationContainer } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
+import { baseUrl } from "../Utils/BaseUrl";
+import axios from "axios";
+import Axios from "../Utils/axiosInterceptors";
 export default function Register({ navigation }) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [birthDate, setBirthdate] = useState("");
+  const [gender, setGender] = useState("");
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordCek, setPasswordCek] = useState("");
+  const [passErr, setPassErr] = useState(true);
   const [fontsLoaded] = useFonts({
     "Poppins-SemiBold": require("../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
@@ -28,6 +42,41 @@ export default function Register({ navigation }) {
   const BackToLogin = () => {
     navigation.navigate("Login");
   };
+
+  const AddData = async () => {
+    console.log(
+      firstName,
+      lastName,
+      phoneNumber,
+      birthDate,
+      gender,
+      address,
+      email,
+      password
+    );
+
+    if (password === passwordCek) {
+      try {
+        const respons = await Axios.post(`${baseUrl}/api/auth/register`, {
+          firstName: firstName,
+          lastName: lastName,
+          phoneNumber: phoneNumber,
+          birthDate: birthDate,
+          gender: gender,
+          address: address,
+          email: email,
+          password: password,
+        });
+
+        console.log(respons);
+        navigation.navigate("Login");
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      setPassErr(false);
+    }
+  };
   return (
     <View style={style.container}>
       <View style={style.img2}>
@@ -38,61 +87,118 @@ export default function Register({ navigation }) {
         <Text style={style.font}>Register and enjoy our features !</Text>
       </View>
 
-      <View style={style.b}>
-        <TextInput
-          style={style.bInput}
-          placeholderTextColor={"#cccccc"}
-          placeholder="Full Name"
-        />
-        <TextInput
-          style={style.bInput}
-          placeholderTextColor={"#cccccc"}
-          placeholder="Email"
-        />
-        <View style={style.pass}>
+      <ScrollView>
+        <View style={style.b}>
           <TextInput
-            secureTextEntry={isPasswordVisible}
-            style={style.bInput1}
-            placeholder="Password"
+            style={style.bInput}
             placeholderTextColor={"#cccccc"}
+            placeholder="FirstName"
+            value={firstName}
+            onChangeText={(text) => setFirstName(text)}
           />
-          <MaterialIcons
-            onPress={visibility}
-            style={style.c2b}
-            name="visibility"
-            size={24}
-            color="black"
-          />
-        </View>
-        <View style={style.pass}>
           <TextInput
-            secureTextEntry={isPasswordVisible1}
-            style={style.bInput1}
-            placeholder="Confirm Password"
+            style={style.bInput}
             placeholderTextColor={"#cccccc"}
+            placeholder="LastName"
+            value={lastName}
+            onChangeText={(text) => setLastName(text)}
           />
-          <MaterialIcons
-            onPress={visibility1}
-            style={style.c2b}
-            name="visibility"
-            size={24}
-            color="black"
+          <TextInput
+            style={style.bInput}
+            placeholderTextColor={"#cccccc"}
+            placeholder="Phone Number"
+            value={phoneNumber}
+            onChangeText={(text) => setPhoneNumber(text)}
           />
+          <TextInput
+            style={style.bInput}
+            placeholderTextColor={"#cccccc"}
+            placeholder="1999-28-05"
+            value={birthDate}
+            onChangeText={(text) => setBirthdate(text)}
+          />
+          <TextInput
+            style={style.bInput}
+            placeholderTextColor={"#cccccc"}
+            placeholder="Gender"
+            value={gender}
+            onChangeText={(text) => setGender(text)}
+          />
+          <TextInput
+            style={style.bInput}
+            placeholderTextColor={"#cccccc"}
+            placeholder="Address"
+            value={address}
+            onChangeText={(text) => setAddress(text)}
+          />
+          <TextInput
+            style={style.bInput}
+            placeholderTextColor={"#cccccc"}
+            placeholder="Email"
+            value={email}
+            onChangeText={(text) => setEmail(text)}
+          />
+          {passErr ? (
+            ""
+          ) : (
+            <Text style={{ color: "red" }}>Password is not the same</Text>
+          )}
+
+          <View style={style.pass}>
+            <TextInput
+              secureTextEntry={isPasswordVisible}
+              style={style.bInput1}
+              placeholder="Password"
+              placeholderTextColor={"#cccccc"}
+              value={password}
+              onChangeText={(text) => setPassword(text)}
+            />
+            <MaterialIcons
+              onPress={visibility}
+              style={style.c2b}
+              name="visibility"
+              size={24}
+              color="black"
+            />
+          </View>
+          {passErr ? (
+            ""
+          ) : (
+            <Text style={{ color: "red" }}>Password is not the same</Text>
+          )}
+          <View style={style.pass}>
+            <TextInput
+              secureTextEntry={isPasswordVisible1}
+              style={style.bInput1}
+              placeholder="Confirm Password"
+              placeholderTextColor={"#cccccc"}
+              value={passwordCek}
+              onChangeText={(text) => setPasswordCek(text)}
+            />
+            <MaterialIcons
+              onPress={visibility1}
+              style={style.c2b}
+              name="visibility"
+              size={24}
+              color="black"
+            />
+          </View>
         </View>
-      </View>
-      <View>
-        <TouchableOpacity style={style.d}>
-          <Text style={style.font1}>Create Account</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={style.e}>
-        <Text>
-          Already have an account ?{" "}
-          <Text style={style.f} onPress={BackToLogin}>
-            Login
+
+        <View>
+          <TouchableOpacity style={style.d} onPress={AddData}>
+            <Text style={style.font1}>Create Account</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={style.e}>
+          <Text>
+            Already have an account ?
+            <Text style={style.f} onPress={BackToLogin}>
+              Login
+            </Text>
           </Text>
-        </Text>
-      </View>
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -123,11 +229,12 @@ const style = StyleSheet.create({
     // backgroundColor: "red",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 30,
+    marginTop: 20,
   },
   a: {
     marginTop: 20,
     gap: 10,
+    marginBottom: 20,
   },
   b: {
     marginTop: 20,
@@ -164,6 +271,7 @@ const style = StyleSheet.create({
   e: {
     alignItems: "center",
     marginTop: 25,
+    marginBottom: 40,
   },
   f: {
     color: "#0984e3",

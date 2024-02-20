@@ -8,6 +8,7 @@ import {
   Modal,
   Pressable,
   TextInput,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import amerika from "../../Asset/Country/amerika.png";
@@ -23,15 +24,17 @@ import { codeCountry } from "../../damiData/ListCountrTrx";
 import axios from "axios";
 import { useFonts } from "expo-font";
 import { AntDesign } from "@expo/vector-icons";
-export default function ListCountry() {
+export default function ListCountry({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
+  const [code, setCode] = useState("");
+  const [ammount, setAmmount] = useState("");
+  const [total, setTotal] = useState("");
   const [fontsLoaded] = useFonts({
     "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
     "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
   });
-  const [id, setId] = useState("");
-  const [jumlah, setJumlah] = useState("");
+
   const datasImg = [
     { img: euro, backgroundColor: "#F5EEE6" },
     { img: amerika, backgroundColor: "#EEEDEB" },
@@ -52,21 +55,54 @@ export default function ListCountry() {
     fixDatas.push(datas);
     idx++;
   }
+
+  const ConfirmationPayment = () => {
+    Alert.alert(
+      "Confirmation",
+      "Do you agree to make payment??",
+      [
+        {
+          text: "No",
+          onPress: () => console.log("Submission canceled"),
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+
+          onPress: () => navigation.navigate("TransferMC"),
+          // Navigate to another screen or perform action here
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const CekTotal = () => {
+    console.log("ini ttl", ammount);
+    console.log("hasil cekTotal : ", code);
+    const exchange = async () => {
+      try {
+        const response = await axios.get(
+          `https://v6.exchangerate-api.com/v6/95d6fc3bf95178f15061160a/pair/${code}/IDR/${parseInt(
+            ammount
+          )}`
+        );
+
+        const hasliConversi = response.data.conversion_rate * ammount;
+        setTotal(hasliConversi);
+        console.log(hasliConversi);
+        // console.log("hasils: ", response.data.conversion_rate);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    exchange();
+  };
   const GoToModal = (id, code) => {
     console.log("hasilll : ", code);
     setModalVisible(true);
-    // const exchange = async () => {
-    //   try {
-    //     const response = await axios.get(
-    //       `https://v6.exchangerate-api.com/v6/95d6fc3bf95178f15061160a/pair/${code}/IDR/2`
-    //     );
-    //     console.log("hasil: ", response.data.conversion_rate);
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // };
-
-    // exchange();
+    setCode(code);
   };
 
   const List = ({ id, code, name, img, color, backgroundColor }) => {
@@ -121,7 +157,11 @@ export default function ListCountry() {
             <View style={styles.container2}>
               <View style={styles.logo}>
                 <AntDesign
-                  onPress={() => setModalVisible(!modalVisible)}
+                  onPress={() => [
+                    setModalVisible(!modalVisible),
+                    setTotal(""),
+                    setAmmount(""),
+                  ]}
                   name="left"
                   size={24}
                   color="black"
@@ -129,33 +169,41 @@ export default function ListCountry() {
               </View>
 
               <View style={styles.a}>
-                <Text>
+                <Text style={styles.txt}>
                   Please enter the amount of money transfer in bellow field
                 </Text>
-                <Text>Enter amount</Text>
+                <Text style={styles.txt}>Enter amount</Text>
               </View>
               <View style={styles.inpt}>
-                <TextInput style={styles.input} />
+                <TextInput
+                  placeholder="Example : 3 $"
+                  onChangeText={setAmmount}
+                  value={ammount}
+                  style={styles.input}
+                />
               </View>
 
               <View style={styles.btn1}>
-                <TouchableOpacity
-                  style={styles.btn}
-                  onPress={() => setModalVisible(!modalVisible)}
-                >
-                  <Text style={{ color: "white" }}>cek</Text>
+                <TouchableOpacity style={styles.btn} onPress={CekTotal}>
+                  <Text
+                    style={{ color: "white", fontFamily: "Poppins-Medium" }}
+                  >
+                    cek
+                  </Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.ttl}>
-                <Text>Total : </Text>
-                <Text> IDR 100000</Text>
+                <Text style={styles.txt}>Total : </Text>
+                <Text style={styles.txt}> IDR {total}</Text>
               </View>
 
               <TouchableOpacity
                 style={styles.btn2}
-                onPress={() => setModalVisible(!modalVisible)}
+                onPress={ConfirmationPayment}
               >
-                <Text style={{ color: "white" }}>Submit</Text>
+                <Text style={{ color: "white", fontFamily: "Poppins-Medium" }}>
+                  Submit
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -166,6 +214,9 @@ export default function ListCountry() {
 }
 
 const styles = StyleSheet.create({
+  txt: {
+    fontFamily: "Poppins-Medium",
+  },
   all: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     height: "100%",
@@ -174,7 +225,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 300,
     alignItems: "center",
-    marginTop: 250,
+    marginTop: 150,
   },
   container2: {
     padding: 20,
@@ -224,11 +275,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   logo: {
-    height: 40,
-    width: 40,
+    height: 50,
+    width: 50,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 10,
   },
 });
 

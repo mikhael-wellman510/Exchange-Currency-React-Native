@@ -2,24 +2,19 @@ import { StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { useState } from "react";
 import Navigation from "./Navigators/Navigation";
+import store from "./Redux/store";
+import { Provider } from "react-redux";
 
 export default function App() {
   const [token, setToken] = useState(false);
+
   return (
     <>
       <NavigationContainer>
-        <Navigation />
+        <Provider store={store}>
+          <Navigation />
+        </Provider>
       </NavigationContainer>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    marginTop: 35,
-    marginRight: 20,
-    marginLeft: 20,
-    backgroundColor: "white",
-  },
-});
