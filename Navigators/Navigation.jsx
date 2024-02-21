@@ -24,7 +24,7 @@ const Stack = createNativeStackNavigator();
 export default function Navigation() {
   const [token, setToken] = useState(true);
   const tokens = useSelector((state) => state.token.value);
-  console.log("ini cukks", tokens);
+
   useEffect(() => {
     const getData = async () => {
       try {

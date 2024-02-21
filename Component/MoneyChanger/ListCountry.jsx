@@ -24,11 +24,16 @@ import { codeCountry } from "../../damiData/ListCountrTrx";
 import axios from "axios";
 import { useFonts } from "expo-font";
 import { AntDesign } from "@expo/vector-icons";
+import { baseUrl } from "../../Utils/BaseUrl";
 export default function ListCountry({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [code, setCode] = useState("");
   const [ammount, setAmmount] = useState("");
   const [total, setTotal] = useState("");
+  const [accNum, setAccNum] = useState("");
+  const [balance, setBalance] = useState("");
+  const [noPin, setNoPin] = useState("");
+  const [noAccIdr, setNoAccIdr] = useState("");
   const [fontsLoaded] = useFonts({
     "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
@@ -46,16 +51,54 @@ export default function ListCountry({ navigation }) {
     { img: arab, backgroundColor: "#E4EFE7" },
     { img: inggris, backgroundColor: "#EDFFEC" },
   ];
+  // ============================================
+
+  const [newData, setNewData] = useState("");
+
+  const getDatas = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/api/account`);
+      setNewData(response.data.data);
+
+      for (const datas of response.data.data) {
+        if (datas.currency.code === "IDR") {
+          setNoAccIdr(datas.accountNumber);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getDatas();
+  }, []);
+
+  // =============================
   let fixDatas = [];
+  let datasNow = [];
   const dataCountry = codeCountry;
   let idx = 0;
-  for (const i of dataCountry) {
-    let datas = { ...dataCountry[idx], ...datasImg[idx] };
+  for (const i of newData) {
+    // {"backgroundColor": "#F5EEE6", "code": "EUR", "id": 1, "img": 26, "name": "Euro"}
+    const dataNews = { accNum: i.accountNumber, balance: i.balance };
+    datasNow.push(dataNews);
+    if (i.currency.code == "IDR") {
+      // console.log("hasil crot", i.accountNumber);
+      // setNoAccIdr(i.accountNumber);
+    } else {
+      let fullData = {
+        ...i.currency,
+        ...datasImg[idx],
+        ...datasNow[idx],
+      };
+      fixDatas.push(fullData);
 
-    fixDatas.push(datas);
-    idx++;
+      idx++;
+    }
   }
 
+  console.log(fixDatas);
   const ConfirmationPayment = () => {
     Alert.alert(
       "Confirmation",
@@ -69,7 +112,8 @@ export default function ListCountry({ navigation }) {
         {
           text: "Yes",
 
-          onPress: () => navigation.navigate("TransferMC"),
+          onPress: () => Transfer(),
+
           // Navigate to another screen or perform action here
         },
       ],
@@ -77,9 +121,32 @@ export default function ListCountry({ navigation }) {
     );
   };
 
+  const Transfer = async () => {
+    console.log("from :", noAccIdr);
+    console.log("ammount : ", ammount);
+    console.log("to number : ", accNum);
+    console.log("pin : ", noPin);
+    try {
+      const response = await axios.post(`${baseUrl}/api/transactions/send`, {
+        fromNumber: noAccIdr,
+        amountTransfer: ammount,
+        toNumber: accNum,
+        pin: noPin,
+      });
+
+      if (response) {
+        navigation.navigate("TransferMC");
+      }
+      console.log("rupiah :  ", total);
+      console.log("pin : ", noPin);
+      console.log("to Number :", accNum);
+      console.log("from : ", noAccIdr);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const CekTotal = () => {
-    console.log("ini ttl", ammount);
-    console.log("hasil cekTotal : ", code);
     const exchange = async () => {
       try {
         const response = await axios.get(
@@ -99,16 +166,27 @@ export default function ListCountry({ navigation }) {
 
     exchange();
   };
-  const GoToModal = (id, code) => {
-    console.log("hasilll : ", code);
+
+  const GoToModal = (id, code, accNum, balance) => {
     setModalVisible(true);
     setCode(code);
+    setAccNum(accNum);
+    setBalance(balance);
   };
 
-  const List = ({ id, code, name, img, color, backgroundColor }) => {
+  const List = ({
+    id,
+    code,
+    name,
+    img,
+    color,
+    backgroundColor,
+    accNum,
+    balance,
+  }) => {
     return (
       <>
-        <TouchableOpacity onPress={() => GoToModal(id, code)}>
+        <TouchableOpacity onPress={() => GoToModal(id, code, accNum, balance)}>
           <View
             style={[style.container2, { backgroundColor: backgroundColor }]}
           >
@@ -137,12 +215,15 @@ export default function ListCountry({ navigation }) {
             code={item.code}
             name={item.name}
             img={item.img}
+            accNum={item.accNum}
+            balance={item.balance}
             backgroundColor={item.backgroundColor}
           />
         )}
         keyExtractor={(item) => item.id}
         numColumns={3}
       />
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -169,16 +250,25 @@ export default function ListCountry({ navigation }) {
               </View>
 
               <View style={styles.a}>
+                <Text>Number : {accNum}</Text>
+                <Text>Balances : {balance} </Text>
                 <Text style={styles.txt}>
                   Please enter the amount of money transfer in bellow field
                 </Text>
-                <Text style={styles.txt}>Enter amount</Text>
               </View>
               <View style={styles.inpt}>
+                <Text style={styles.txt}>Enter amount</Text>
                 <TextInput
                   placeholder="Example : 3 $"
                   onChangeText={setAmmount}
                   value={ammount}
+                  style={styles.input}
+                />
+
+                <Text style={styles.txt}>Input Pin</Text>
+                <TextInput
+                  onChangeText={setNoPin}
+                  value={noPin}
                   style={styles.input}
                 />
               </View>
@@ -231,7 +321,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "white",
     width: 350,
-    height: 500,
+    height: 550,
     borderRadius: 10,
   },
   a: {

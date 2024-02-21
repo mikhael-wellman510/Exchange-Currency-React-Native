@@ -5,19 +5,82 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import YourCard from "./YourCard";
+import axios from "axios";
+import Axios from "../../Utils/axiosInterceptors";
+import { baseUrl } from "../../Utils/BaseUrl";
 export default function AddBank({ navigation }) {
   const [fontsLoaded] = useFonts({
     "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
     "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
   });
-  const [bankAcc, setBankAcc] = useState(true);
+
+  const [cardNumber, setCardNumber] = useState("");
+  const [name, setName] = useState("");
+  const [expDate, setExpDate] = useState("");
+  const [cvv, setCvv] = useState("");
+
+  const [bankAcc, setBankAcc] = useState(false);
+  const [panjang, setPanjang] = useState(true);
   const GoHome = () => {
     navigation.navigate("Home");
+  };
+
+  const getDatas = async () => {
+    try {
+      const hasil = await Axios.get(`${baseUrl}/api/dummy-bank`);
+      if (hasil) {
+        setBankAcc(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getDatas();
+  }, []);
+  const handleCard = (input) => {
+    // Menghapus semua karakter non-digit dari input
+    let formattedInput = input.replace(/\D/g, "");
+
+    // Memformat input setiap empat angka dengan tanda hubung "-"
+    formattedInput = formattedInput.replace(/(\d{4})/g, "$1-");
+
+    // Menghapus tanda hubung ekstra yang mungkin muncul di akhir
+    formattedInput = formattedInput.replace(/-$/, "");
+
+    // Set nomor kartu yang diformat ke dalam state
+    setCardNumber(formattedInput);
+  };
+
+  const SendData = async () => {
+    console.log("panjang", cardNumber.length);
+    if (cardNumber.length == 19) {
+      try {
+        setPanjang(true);
+
+        const response = await axios.post(`${baseUrl}/api/dummy-bank`, {
+          cardNumber: cardNumber,
+          holderName: name,
+          cvv: cvv,
+          expDate: expDate,
+        });
+
+        if (response) {
+          setBankAcc(true);
+        }
+        console.log("tes", response);
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      setPanjang(false);
+    }
   };
 
   return (
@@ -50,27 +113,49 @@ export default function AddBank({ navigation }) {
 
             <View style={style.data}>
               <View>
+                {panjang ? (
+                  ""
+                ) : (
+                  <Text style={{ color: "red" }}>input harus 16 karakter</Text>
+                )}
                 <Text style={style.text}>Card Number</Text>
                 <TextInput
                   placeholder="ex - 0931-5131-5321-6477"
                   style={style.input}
+                  value={cardNumber}
+                  onChangeText={handleCard}
+                  keyboardType="numeric"
                 />
               </View>
 
               <View>
                 <Text style={style.text}>Holders Name</Text>
-                <TextInput style={style.input} />
+                <TextInput
+                  style={style.input}
+                  value={name}
+                  onChangeText={(text) => setName(text)}
+                />
               </View>
               <View>
                 <Text style={style.text}>Expiry Date</Text>
-                <TextInput style={style.input} />
+                <TextInput
+                  style={style.input}
+                  placeholder="mm/YY"
+                  value={expDate}
+                  onChangeText={(text) => setExpDate(text)}
+                />
               </View>
               <View>
                 <Text style={style.text}>CVV</Text>
-                <TextInput style={style.input} />
+                <TextInput
+                  placeholder="8824"
+                  value={cvv}
+                  onChangeText={(text) => setCvv(text)}
+                  style={style.input}
+                />
               </View>
               <View style={style.tbl}>
-                <TouchableOpacity style={style.button}>
+                <TouchableOpacity onPress={SendData} style={style.button}>
                   <Text
                     style={{ fontFamily: "Poppins-SemiBold", color: "white" }}
                   >

@@ -1,4 +1,14 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Pressable,
+  TextInput,
+  ScrollView,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AntDesign } from "@expo/vector-icons";
@@ -22,6 +32,10 @@ export default function Profile({ navigation }) {
   const [email, setEmail] = useState("");
   const [images, setImages] = useState("");
   const [customerId, setCustomerId] = useState("");
+  const [pins, setPin] = useState("");
+  const [pinErr, setPinErr] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [dataPin, setDataPin] = useState(false);
   const tokens = useSelector((state) => state.token.value);
   const route = useRoute();
   const dataEdit = route.params;
@@ -48,7 +62,7 @@ export default function Profile({ navigation }) {
       const response = await axios.get(
         `${baseUrl}/api/customer/${decoded.customerId}`
       );
-      console.log("rr", response.data);
+
       setFirstName(response.data.data.firstName);
       setLastName(response.data.data.lastName);
       setPhoneNumber(response.data.data.phoneNumber);
@@ -57,6 +71,12 @@ export default function Profile({ navigation }) {
       setAddress(response.data.data.address);
       setEmail(response.data.data.userCredential.email);
       setImages(response.data.data.images);
+
+      if (response.data.data.userCredential.pin) {
+        setDataPin(true);
+      }
+
+      console.log(response.data.data.userCredential.pin, "data custs");
     } catch (error) {
       console.log("errors bos");
     }
@@ -96,6 +116,26 @@ export default function Profile({ navigation }) {
     navigation.navigate("EditAccount", datas);
   };
 
+  const AddPin = () => {
+    setModalVisible(true);
+  };
+  const SubmitPin = async () => {
+    try {
+      if (6 == pins.length) {
+        const response = await axios.post(`${baseUrl}/api/auth/pin`, {
+          pin: pins,
+        });
+        setModalVisible(!modalVisible);
+        setDataPin(true);
+        setPin("");
+      } else {
+        setPinErr(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       <View style={style.con}>
@@ -104,51 +144,118 @@ export default function Profile({ navigation }) {
             <AntDesign name="left" size={24} color="black" />
             <Text style={style.teks}>Account Info</Text>
           </View>
-          <View style={style.icon}>
-            {images ? (
-              <Image
-                style={{ width: 100, height: 100 }}
-                source={{
-                  uri: images,
-                }}
-              />
-            ) : (
-              <MaterialCommunityIcons
-                name="face-woman-shimmer-outline"
-                size={70}
-                color="black"
-              />
-            )}
-          </View>
-          <View>
-            <View style={style.info}>
-              <Text style={style.teks}>Personal Info</Text>
+          <ScrollView style={style.swipe}>
+            <View style={style.icon}>
+              {images ? (
+                <Image
+                  style={{ width: 100, height: 100 }}
+                  source={{
+                    uri: images,
+                  }}
+                />
+              ) : (
+                <MaterialCommunityIcons
+                  name="face-woman-shimmer-outline"
+                  size={70}
+                  color="black"
+                />
+              )}
             </View>
-            <View style={style.text}>
-              <Text style={style.teks}>
-                Your Name : {`${firstName} ${lastName}`}
-              </Text>
-              <Text style={style.teks}>Phone Number : {phoneNumber}</Text>
-              <Text style={style.teks}>Birth Date : {birthDate}</Text>
-              <Text style={style.teks}>Gender : {gender}</Text>
-              <Text style={style.teks}>Addrres: {address}</Text>
-              <Text style={style.teks}>Email: {email}</Text>
+            <View>
+              <View style={style.info}>
+                <Text style={style.teks}>Personal Info</Text>
+              </View>
+              <View style={style.text}>
+                <Text style={style.teks}>
+                  Your Name : {`${firstName} ${lastName}`}
+                </Text>
+                <Text style={style.teks}>Phone Number : {phoneNumber}</Text>
+                <Text style={style.teks}>Birth Date : {birthDate}</Text>
+                <Text style={style.teks}>Gender : {gender}</Text>
+                <Text style={style.teks}>Addrres: {address}</Text>
+                <Text style={style.teks}>Email: {email}</Text>
+                {dataPin ? (
+                  <Text style={style.teks}>Your Pin : * * * * * * </Text>
+                ) : (
+                  ""
+                )}
+
+                <TouchableOpacity style={style.button} onPress={AddPin}>
+                  {dataPin ? (
+                    <Text style={{ color: "white" }}>Update Pin</Text>
+                  ) : (
+                    <Text style={{ color: "white" }}>Add Pin</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+              <View style={style.editBtn}>
+                <TouchableOpacity style={style.btn} onPress={GoToEditAccount}>
+                  <Text style={style.teks1}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={style.btn2} onPress={GoToLogout}>
+                  <Text style={style.teks1}>Logout</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={style.editBtn}>
-              <TouchableOpacity style={style.btn} onPress={GoToEditAccount}>
-                <Text style={style.teks1}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={style.btn2} onPress={GoToLogout}>
-                <Text style={style.teks1}>Logout</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          </ScrollView>
         </View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            Alert.alert("Modal has been closed.s");
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              {dataPin ? (
+                <Text style={styles.modalText}>Edit Pin!</Text>
+              ) : (
+                <Text style={styles.modalText}>Add Pin!</Text>
+              )}
+
+              <View>
+                {pinErr ? (
+                  <Text style={{ color: "red" }}>Pin Must 6 Character</Text>
+                ) : (
+                  ""
+                )}
+
+                <Text>Input your Pin : </Text>
+                <TextInput
+                  value={pins}
+                  onChangeText={(text) => setPin(text)}
+                  style={styles.textInput}
+                  keyboardType="numeric"
+                />
+              </View>
+              <View style={styles.btn1}>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={SubmitPin}
+                >
+                  <Text style={styles.textStyle2}>Submit Pin</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.button, styles.buttonClose2]}
+                  onPress={() => setModalVisible(!modalVisible, setPin(""))}
+                >
+                  <Text style={styles.textStyle}>Back</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
     </>
   );
 }
 const style = StyleSheet.create({
+  swipe: {
+    height: 670,
+  },
   con: {
     backgroundColor: "white",
     width: "100%",
@@ -220,5 +327,78 @@ const style = StyleSheet.create({
   teks1: {
     fontFamily: "Poppins-Medium",
     color: "white",
+  },
+  button: {
+    marginLeft: 120,
+    backgroundColor: "green",
+    width: 100,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+  },
+});
+
+//Modal
+const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    height: 350,
+    width: 300,
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: "#F194FF",
+  },
+  buttonClose2: {
+    backgroundColor: "red",
+  },
+  buttonClose: {
+    backgroundColor: "green",
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  textStyle2: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  textInput: {
+    borderBottomWidth: 1,
+    color: "grey",
+    marginTop: 20,
+  },
+  btn1: {
+    marginTop: 60,
+    gap: 10,
   },
 });

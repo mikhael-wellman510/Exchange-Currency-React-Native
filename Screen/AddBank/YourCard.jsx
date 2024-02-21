@@ -1,18 +1,44 @@
 import { View, Text, StyleSheet, Image } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useFonts } from "expo-font";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import mc from "../../Asset/a.png";
+import Axios from "../../Utils/axiosInterceptors";
+import { baseUrl } from "../../Utils/BaseUrl";
 export default function YourCard({ navigation }) {
   const [fontsLoaded] = useFonts({
     "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
     "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
     "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
   });
+
+  const [number, setNumber] = useState("");
+  const [name, setName] = useState("");
+  const [expDate, setExpDate] = useState("");
+  const [account, setAccount] = useState("");
   const GoHome = () => {
     navigation.navigate("Home");
   };
+
+  const getDatas = async () => {
+    try {
+      const hasil = await Axios.get(`${baseUrl}/api/dummy-bank`);
+      if (hasil) {
+        console.log(hasil.data);
+        setNumber(hasil.data.data.cardNumber);
+        setName(hasil.data.data.holderName);
+        setExpDate(hasil.data.data.expDate);
+        setAccount(hasil.data.data.accountNumber);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getDatas();
+  }, []);
   return (
     <View style={style.container}>
       <View style={style.c}>
@@ -45,7 +71,7 @@ export default function YourCard({ navigation }) {
             </View>
             <View style={style.no}>
               <Text style={{ fontSize: 20, letterSpacing: 4, marginLeft: 26 }}>
-                1234 5678 9898 8989
+                {number}
               </Text>
             </View>
             <View style={style.datas}>
@@ -85,19 +111,19 @@ export default function YourCard({ navigation }) {
         <View style={style.profil}>
           <View style={style.z}>
             <Text style={style.bck}>Card Number</Text>
-            <Text style={style.bcc}>0988 - 1268 - 1888 - 9999</Text>
+            <Text style={style.bcc}>{number}</Text>
           </View>
           <View style={style.z}>
             <Text style={style.bck}>Holders Name</Text>
-            <Text style={style.bcc}>Baskara Restu Wirawan</Text>
+            <Text style={style.bcc}>{name}</Text>
           </View>
           <View style={style.z}>
             <Text style={style.bck}>Expiry Date</Text>
-            <Text style={style.bcc}>11/25</Text>
+            <Text style={style.bcc}>{expDate}</Text>
           </View>
           <View style={style.z}>
-            <Text style={style.bck}>CVV</Text>
-            <Text style={style.bcc}>8824</Text>
+            <Text style={style.bck}>Account Number</Text>
+            <Text style={style.bcc}>{account}</Text>
           </View>
         </View>
       </View>
